@@ -7,9 +7,7 @@ import gl "vendor:OpenGL"
 
 main :: proc() {}
 
-id : u32
-
-create_program :: proc() {
+create_program :: proc() -> u32 {
 	vertex_shader_from_file, okv := os.read_entire_file_from_filename("shader/vertex_shader.txt")
     if !okv do fmt.println("Failed to read shader file")
     vertex_cstring := cstring(&vertex_shader_from_file[0])
@@ -41,23 +39,24 @@ create_program :: proc() {
         text := strings.string_from_ptr(&data[0], cast(int)length)
         fmt.println(text)
     }
-    id = gl.CreateProgram()
-    gl.AttachShader(id, vertex_shader)
-    gl.AttachShader(id, fragment_shader)
-    gl.LinkProgram(id)
-    gl.GetProgramiv(id, gl.LINK_STATUS, &success)
+    program := gl.CreateProgram()
+    gl.AttachShader(program, vertex_shader)
+    gl.AttachShader(program, fragment_shader)
+    gl.LinkProgram(program)
+    gl.GetProgramiv(program, gl.LINK_STATUS, &success)
     if success == 0 {
         fmt.println("Failed gl.GetProgramiv")
         length : i32
         data : [512]u8
-        gl.GetProgramInfoLog(id, 512, &length, &data[0])
+        gl.GetProgramInfoLog(program, 512, &length, &data[0])
         text := strings.string_from_ptr(&data[0], cast(int)length)
         fmt.println(text)
     }
     gl.DeleteShader(vertex_shader)
     gl.DeleteShader(fragment_shader)
+    return program
 }
 
-set_bool :: proc(name : cstring, value : bool) {
-	gl.Uniform1i(gl.GetUniformLocation(id, name), cast(i32)value)
+set_bool :: proc(program : u32, name : cstring, value : bool) {
+	gl.Uniform1i(gl.GetUniformLocation(program, name), cast(i32)value)
 } 
