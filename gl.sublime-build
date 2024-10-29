@@ -1,5 +1,0 @@
-{
-    "working_dir": "c:/odin/projects/gl/",
-    "shell_cmd": "c:/odin/odin/odin run . -debug",
-    "file_regex": "^(.+)\\(([0-9]+):([0-9]+)\\) (.+)$"
-}

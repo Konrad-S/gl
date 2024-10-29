@@ -1,0 +1,16 @@
+{
+	"folders":
+	[
+        {
+        	"path": "."
+        }
+	],
+	"build_systems":
+    [
+        {
+        	"name": "gl",
+		    "working_dir": "c:/odin/projects/gl/source",
+		    "shell_cmd": "c:/odin/odin/odin run . -debug",
+		}
+    ]
+}
