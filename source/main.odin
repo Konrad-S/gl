@@ -59,7 +59,7 @@ process_input :: proc(window : glfw.WindowHandle) {
 }
 
 init :: proc() -> (u32, u32) {
-    shader_program := shader.create_program()
+    shader_program := shader.create_program("shader/vertex_shader.txt", "shader/fragment_shader.txt")
 
     vertices : [18]f32 = {
         // positions         // colors

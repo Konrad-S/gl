@@ -7,8 +7,8 @@ import gl "vendor:OpenGL"
 
 main :: proc() {}
 
-create_program :: proc() -> u32 {
-	vertex_shader_from_file, okv := os.read_entire_file_from_filename("shader/vertex_shader.txt")
+create_program :: proc(vertex_path, fragment_path : string) -> u32 {
+	vertex_shader_from_file, okv := os.read_entire_file_from_filename(vertex_path)
     if !okv do fmt.println("Failed to read shader file")
     vertex_cstring := cstring(&vertex_shader_from_file[0])
     vertex_shader := gl.CreateShader(gl.VERTEX_SHADER)
@@ -24,7 +24,7 @@ create_program :: proc() -> u32 {
         text := strings.string_from_ptr(&data[0], cast(int)length)
         fmt.println(text)
     }
-    fragment_shader_from_file, okf := os.read_entire_file_from_filename("shader/fragment_shader.txt")
+    fragment_shader_from_file, okf := os.read_entire_file_from_filename(fragment_path)
     if !okf do fmt.println("Failed to read shader file")
     fragment_cstring := cstring(&fragment_shader_from_file[0])
     fragment_shader := gl.CreateShader(gl.FRAGMENT_SHADER);
@@ -59,4 +59,12 @@ create_program :: proc() -> u32 {
 
 set_bool :: proc(program : u32, name : cstring, value : bool) {
 	gl.Uniform1i(gl.GetUniformLocation(program, name), cast(i32)value)
-} 
+}
+
+set_int :: proc(program : u32, name : cstring, value : i32) {
+    gl.Uniform1i(gl.GetUniformLocation(program, name), cast(i32)value)
+}
+
+set_float :: proc(program : u32, name : cstring, value : f32) {
+    gl.Uniform1i(gl.GetUniformLocation(program, name), cast(i32)value)
+}
