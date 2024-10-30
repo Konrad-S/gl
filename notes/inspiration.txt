@@ -1,0 +1,4 @@
+"one reason to keep your file system simple" -jblow
+	putting one thing per line allows continued parsing if parsing a line fails
+
+just put one entity per line, with the section defining what each line in it will contain

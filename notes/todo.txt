@@ -1,0 +1,15 @@
+next: 
+https://learnopengl.com/Getting-started/Shaders
+Our own shader class
+write shader compiler in separate file
+	eventually could be its own package but not now
+
+implement modern rendering techniques
+polygons
+models
+	import
+textures
+directional lights and shadows
+point lights
+pbr physical based rendering
+shaders
