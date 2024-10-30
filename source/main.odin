@@ -60,12 +60,20 @@ process_input :: proc(window : glfw.WindowHandle) {
 
 init :: proc() -> (u32, u32) {
     shader_program := shader.create_program("shader/vertex_shader.txt", "shader/fragment_shader.txt")
+    gl.UseProgram(shader_program)
+    shader.set_vec2_float(shader_program, "offset", 0, 0)
 
     vertices : [18]f32 = {
         // positions         // colors
          0.5, -0.5, 0.0,  1.0, 0.0, 0.0,   // bottom right
         -0.5, -0.5, 0.0,  0.0, 1.0, 0.0,   // bottom left
          0.0,  0.5, 0.0,  0.0, 0.0, 1.0    // top 
+    }
+
+    tex_coords : [6]f32 = {
+         0, 0,
+         1, 0,
+        .5, 1
     }
 
     VBO, VAO : u32

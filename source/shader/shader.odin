@@ -62,9 +62,14 @@ set_bool :: proc(program : u32, name : cstring, value : bool) {
 }
 
 set_int :: proc(program : u32, name : cstring, value : i32) {
-    gl.Uniform1i(gl.GetUniformLocation(program, name), cast(i32)value)
+    gl.Uniform1i(gl.GetUniformLocation(program, name), value)
 }
 
 set_float :: proc(program : u32, name : cstring, value : f32) {
-    gl.Uniform1i(gl.GetUniformLocation(program, name), cast(i32)value)
+    gl.Uniform1f(gl.GetUniformLocation(program, name), value)
+}
+
+set_vec2_float :: proc(program : u32, name : cstring, x, y : f32) {
+    location := gl.GetUniformLocation(program, name)
+    gl.Uniform2f(location, x, y)
 }
