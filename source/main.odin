@@ -4,6 +4,7 @@ import "core:fmt"
 import "core:c"
 import "core:strings"
 import "core:os"
+import "core:image"
 
 import gl "vendor:OpenGL"
 import "vendor:glfw"
@@ -81,6 +82,13 @@ init :: proc() -> (u32, u32) {
     gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
     gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
     
+    texture_data, ok := image.load_from_file("texture/first.jpg")
+    texture : u32
+    gl.GenTextures(1, &texture)
+    gl.BindTexture(gl.TEXTURE_2D, texture)
+    gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGB, cast(i32)texture_data.width, cast(i32)texture_data.height, 0, gl.RGB, gl.UNSIGNED_BYTE, raw_data(texture_data.pixels.buf))
+    gl.GenerateMipmap(gl.TEXTURE_2D)
+
 
     VBO, VAO : u32
 
