@@ -62,7 +62,9 @@ set_bool :: proc(program : u32, name : cstring, value : bool) {
 }
 
 set_int :: proc(program : u32, name : cstring, value : i32) {
-    gl.Uniform1i(gl.GetUniformLocation(program, name), value)
+    location := gl.GetUniformLocation(program, name)
+    if location < 0 do fmt.println("Could not find uniform" + name)
+    gl.Uniform1i(location, value)
 }
 
 set_float :: proc(program : u32, name : cstring, value : f32) {

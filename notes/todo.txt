@@ -1,8 +1,8 @@
 next: 
 https://learnopengl.com/Getting-started/Shaders
-Our own shader class
-write shader compiler in separate file
-	eventually could be its own package but not now
+
+continue debug texture 
+add checking to uniform setters in shader.odin
 
 implement modern rendering techniques
 polygons

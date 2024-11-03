@@ -1,8 +1,10 @@
 #version 330 core
 layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0
 layout (location = 1) in vec3 aColor; // the color variable has attribute position 1
-  
+layout (location = 2) in vec2 aTexCoord;
+
 out vec3 ourColor; // output a color to the fragment shader
+out vec2 TexCoord;
 
 uniform vec2 offset;
 
@@ -10,4 +12,5 @@ void main()
 {
     gl_Position = vec4(aPos + vec3(offset, 0), 1.0);
     ourColor = gl_Position.xyz;
+    TexCoord = aTexCoord;
 } 
