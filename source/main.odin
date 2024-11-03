@@ -4,7 +4,7 @@ import "core:fmt"
 import "core:c"
 import "core:strings"
 import "core:os"
-import "core:image"
+import "core:image/bmp"
 
 import gl "vendor:OpenGL"
 import "vendor:glfw"
@@ -82,7 +82,7 @@ init :: proc() -> (u32, u32) {
     gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
     gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
     
-    texture_data, ok := image.load_from_file("texture/first.jpg")
+    texture_data, ok := bmp.load_from_file("texture/first.bmp")
     texture : u32
     gl.GenTextures(1, &texture)
     gl.BindTexture(gl.TEXTURE_2D, texture)
