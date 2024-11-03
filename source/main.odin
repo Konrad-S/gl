@@ -50,6 +50,9 @@ main :: proc() {
         glfw.SwapBuffers(window)
         glfw.PollEvents()
     }
+    gl.DeleteVertexArrays(1, &VAO)
+    gl.DeleteProgram(shader_program)
+    glfw.Terminate()
     exit()
 }
 
@@ -64,11 +67,18 @@ init :: proc() -> (u32, u32) {
     gl.UseProgram(shader_program)
     shader.set_vec2_float(shader_program, "offset", 0, 0)
 
-    vertices : [18]f32 = {
+    vertices : [24]f32 = {
         // positions         // colors
          0.5, -0.5, 0.0,  1.0, 0.0, 0.0,   // bottom right
         -0.5, -0.5, 0.0,  0.0, 1.0, 0.0,   // bottom left
-         0.0,  0.5, 0.0,  0.0, 0.0, 1.0    // top 
+         0.5,  0.5, 0.0,  0.0, 0.0, 1.0,   // top right 
+        -0.5,  0.5, 0.0,  0.0, 0.0, 1.0,   // top left
+    }
+
+    
+    indices : [6]u32 = {  // note that we start from 0!
+        0, 1, 2,   // first triangle
+        1, 2, 3,   // second triangle
     }
 
     tex_coords : [6]f32 = {
@@ -90,14 +100,18 @@ init :: proc() -> (u32, u32) {
     gl.GenerateMipmap(gl.TEXTURE_2D)
 
 
-    VBO, VAO : u32
+    VBO, VAO, EBO : u32
 
     gl.GenVertexArrays(1, &VAO)
     gl.GenBuffers(1, &VBO)
+    gl.GenBuffers(1, &EBO)
     gl.BindVertexArray(VAO)
 
     gl.BindBuffer(gl.ARRAY_BUFFER, VBO);
     gl.BufferData(gl.ARRAY_BUFFER, size_of(vertices), &vertices[0], gl.STATIC_DRAW);
+
+    gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, EBO);
+    gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, size_of(indices), &indices[0], gl.STATIC_DRAW);
 
     gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 6 * size_of(f32), 0)
     gl.EnableVertexAttribArray(0)
@@ -122,8 +136,8 @@ draw :: proc(shader_program, VAO : u32){
     gl.Clear(gl.COLOR_BUFFER_BIT)
     gl.UseProgram(shader_program)
     gl.BindVertexArray(VAO)
-    gl.DrawArrays(gl.TRIANGLES, 0, 3)
-
+    //gl.DrawArrays(gl.TRIANGLES, 0, 3)
+    gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, nil)
 }
 
 exit :: proc(){
