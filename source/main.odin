@@ -70,12 +70,15 @@ init :: proc() -> (u32, u32) {
     VERTEX_SIZE :: 8
     VERTEX_COUNT :: 4
 
+    tc : f32 = .25
+    to : f32 = .45
+
     vertices : [VERTEX_SIZE * VERTEX_COUNT]f32 = {
         // positions          // colors           // texture coords
-         0.5,  0.5, 0.0,   1.0, 0.0, 0.0,   1.0, 1.0,   // top right
-         0.5, -0.5, 0.0,   0.0, 1.0, 0.0,   1.0, 0.0,   // bottom right
-        -0.5, -0.5, 0.0,   0.0, 0.0, 1.0,   0.0, 0.0,   // bottom left
-        -0.5,  0.5, 0.0,   1.0, 1.0, 0.0,   0.0, 1.0    // top left 
+         0.5,  0.5, 0.0,   1.0, 0.0, 0.0,   tc+to, tc+to,   // top right
+         0.5, -0.5, 0.0,   0.0, 1.0, 0.0,   tc+to, tc,   // bottom right
+        -0.5, -0.5, 0.0,   0.0, 0.0, 1.0,   tc, tc,   // bottom left
+        -0.5,  0.5, 0.0,   1.0, 1.0, 0.0,   tc, tc+to    // top left 
     }
 
     indices : [6]u32 = {  // note that we start from 0!
@@ -95,6 +98,20 @@ init :: proc() -> (u32, u32) {
     texture_data, ok := bmp.load_from_file("texture/fourth.bmp")
     gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGB, cast(i32)texture_data.width, cast(i32)texture_data.height, 0, gl.RGB, gl.UNSIGNED_BYTE, raw_data(texture_data.pixels.buf))
     gl.GenerateMipmap(gl.TEXTURE_2D)
+    shader.set_int(shader_program, "texture1", 0)
+
+    gl.GenTextures(1, &texture)
+    gl.ActiveTexture(gl.TEXTURE1)
+    gl.BindTexture(gl.TEXTURE_2D, texture)
+    gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRROR_CLAMP_TO_EDGE)
+    gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT)
+    gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+    gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+    
+    texture_data, ok = bmp.load_from_file("texture/third.bmp")
+    gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGB, cast(i32)texture_data.width, cast(i32)texture_data.height, 0, gl.RGB, gl.UNSIGNED_BYTE, raw_data(texture_data.pixels.buf))
+    gl.GenerateMipmap(gl.TEXTURE_2D)
+    shader.set_int(shader_program, "texture1", 1)
 
 
     VBO, VAO, EBO : u32

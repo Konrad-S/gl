@@ -10,7 +10,8 @@
         {
         	"name": "gl",
 		    "working_dir": "c:/odin/projects/gl/source",
-		    "shell_cmd": "c:/odin/odin/odin run . -debug -vet-shadowing -o:none",
+		    "shell_cmd": "c:/odin/odin/odin run . -out:gl.exe -debug -vet-shadowing -o:none",
+		    //https://github.com/odin-lang/Odin/wiki/Compiler-Flags
 		}
     ]
 }
