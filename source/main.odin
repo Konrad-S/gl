@@ -78,7 +78,6 @@ init :: proc() -> (u32, u32) {
         -0.5,  0.5, 0.0,   1.0, 1.0, 0.0,   0.0, 1.0    // top left 
     }
 
-    
     indices : [6]u32 = {  // note that we start from 0!
         0, 1, 3,   // first triangle
         1, 2, 3,   // second triangle
@@ -88,18 +87,13 @@ init :: proc() -> (u32, u32) {
     gl.GenTextures(1, &texture)
     gl.ActiveTexture(gl.TEXTURE0)
     gl.BindTexture(gl.TEXTURE_2D, texture)
-    shader.set_int(shader_program, "_randtexture1", 0)
     gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT)
     gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT)
     gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
     gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
     
     texture_data, ok := bmp.load_from_file("texture/fourth.bmp")
-    //TEXTURE_WIDTH :: 100
-    //TEXTURE_HEIGHT :: 100
-    //texture_buffer : [TEXTURE_WIDTH * TEXTURE_HEIGHT]u8 = {}
     gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGB, cast(i32)texture_data.width, cast(i32)texture_data.height, 0, gl.RGB, gl.UNSIGNED_BYTE, raw_data(texture_data.pixels.buf))
-    //gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGB, TEXTURE_WIDTH, TEXTURE_HEIGHT, 0, gl.RGB, gl.UNSIGNED_BYTE, &texture_buffer)
     gl.GenerateMipmap(gl.TEXTURE_2D)
 
 
@@ -123,6 +117,7 @@ init :: proc() -> (u32, u32) {
     gl.EnableVertexAttribArray(1)
 
     gl.VertexAttribPointer(2, 2, gl.FLOAT, gl.FALSE, VERTEX_SIZE * size_of(f32), 6 * size_of(f32))
+    gl.EnableVertexAttribArray(2)
 
     gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 
