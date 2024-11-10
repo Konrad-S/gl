@@ -5,6 +5,7 @@ import "core:c"
 import "core:strings"
 import "core:os"
 import "core:image/bmp"
+import linalg "core:math/linalg"
 
 import gl "vendor:OpenGL"
 import "vendor:glfw"
@@ -43,6 +44,7 @@ main :: proc() {
     glfw.SetFramebufferSizeCallback(window, size_callback)
     gl.load_up_to(int(GL_MAJOR_VERSION), GL_MINOR_VERSION, glfw.gl_set_proc_address) // I assume this does the same thing GLAD would do?
     shader_program, VAO := init()
+
     for (!glfw.WindowShouldClose(window) && running) {
         process_input(window)
         update()
@@ -66,19 +68,61 @@ init :: proc() -> (u32, u32) {
     shader_program := shader.create_program("shader/vertex_shader.txt", "shader/fragment_shader.txt")
     gl.UseProgram(shader_program)
     shader.set_vec2_float(shader_program, "offset", 0, 0)
+    gl.Enable(gl.DEPTH_TEST)
 
-    VERTEX_SIZE :: 8
-    VERTEX_COUNT :: 4
 
-    tc : f32 = .25
-    to : f32 = .45
+    projection_matrix := linalg.matrix4_perspective_f32(cast(f32)linalg.to_radians(45.), SCR_WIDTH / SCR_HEIGHT, .1, 100)
+    transform_location := gl.GetUniformLocation(shader_program, "projection")
+    flatten := linalg.matrix_flatten(projection_matrix)
+    raw := raw_data(flatten[:])
+    gl.UniformMatrix4fv(transform_location, 1, gl.FALSE, raw)
+
+    VERTEX_SIZE :: 5
+    VERTEX_COUNT :: 36
+
 
     vertices : [VERTEX_SIZE * VERTEX_COUNT]f32 = {
-        // positions          // colors           // texture coords
-         0.5,  0.5, 0.0,   1.0, 0.0, 0.0,   tc+to, tc+to,   // top right
-         0.5, -0.5, 0.0,   0.0, 1.0, 0.0,   tc+to, tc,   // bottom right
-        -0.5, -0.5, 0.0,   0.0, 0.0, 1.0,   tc, tc,   // bottom left
-        -0.5,  0.5, 0.0,   1.0, 1.0, 0.0,   tc, tc+to    // top left 
+        -0.5, -0.5, -0.5,  0.0, 0.0,
+         0.5, -0.5, -0.5,  1.0, 0.0,
+         0.5,  0.5, -0.5,  1.0, 1.0,
+         0.5,  0.5, -0.5,  1.0, 1.0,
+        -0.5,  0.5, -0.5,  0.0, 1.0,
+        -0.5, -0.5, -0.5,  0.0, 0.0,
+
+        -0.5, -0.5,  0.5,  0.0, 0.0,
+         0.5, -0.5,  0.5,  1.0, 0.0,
+         0.5,  0.5,  0.5,  1.0, 1.0,
+         0.5,  0.5,  0.5,  1.0, 1.0,
+        -0.5,  0.5,  0.5,  0.0, 1.0,
+        -0.5, -0.5,  0.5,  0.0, 0.0,
+
+        -0.5,  0.5,  0.5,  1.0, 0.0,
+        -0.5,  0.5, -0.5,  1.0, 1.0,
+        -0.5, -0.5, -0.5,  0.0, 1.0,
+        -0.5, -0.5, -0.5,  0.0, 1.0,
+        -0.5, -0.5,  0.5,  0.0, 0.0,
+        -0.5,  0.5,  0.5,  1.0, 0.0,
+
+         0.5,  0.5,  0.5,  1.0, 0.0,
+         0.5,  0.5, -0.5,  1.0, 1.0,
+         0.5, -0.5, -0.5,  0.0, 1.0,
+         0.5, -0.5, -0.5,  0.0, 1.0,
+         0.5, -0.5,  0.5,  0.0, 0.0,
+         0.5,  0.5,  0.5,  1.0, 0.0,
+
+        -0.5, -0.5, -0.5,  0.0, 1.0,
+         0.5, -0.5, -0.5,  1.0, 1.0,
+         0.5, -0.5,  0.5,  1.0, 0.0,
+         0.5, -0.5,  0.5,  1.0, 0.0,
+        -0.5, -0.5,  0.5,  0.0, 0.0,
+        -0.5, -0.5, -0.5,  0.0, 1.0,
+
+        -0.5,  0.5, -0.5,  0.0, 1.0,
+         0.5,  0.5, -0.5,  1.0, 1.0,
+         0.5,  0.5,  0.5,  1.0, 0.0,
+         0.5,  0.5,  0.5,  1.0, 0.0,
+        -0.5,  0.5,  0.5,  0.0, 0.0,
+        -0.5,  0.5, -0.5,  0.0, 1.0
     }
 
     indices : [6]u32 = {  // note that we start from 0!
@@ -130,11 +174,8 @@ init :: proc() -> (u32, u32) {
     gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, VERTEX_SIZE * size_of(f32), 0)
     gl.EnableVertexAttribArray(0)
 
-    gl.VertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, VERTEX_SIZE * size_of(f32), 3 * size_of(f32))
+    gl.VertexAttribPointer(1, 2, gl.FLOAT, gl.FALSE, VERTEX_SIZE * size_of(f32), 3 * size_of(f32))
     gl.EnableVertexAttribArray(1)
-
-    gl.VertexAttribPointer(2, 2, gl.FLOAT, gl.FALSE, VERTEX_SIZE * size_of(f32), 6 * size_of(f32))
-    gl.EnableVertexAttribArray(2)
 
     gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 
@@ -150,11 +191,36 @@ update :: proc(){
 
 draw :: proc(shader_program, VAO : u32){
     gl.ClearColor(0.2, 0.3, 0.3, 1.0)
-    gl.Clear(gl.COLOR_BUFFER_BIT)
+    gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
     gl.UseProgram(shader_program)
     gl.BindVertexArray(VAO)
-    //gl.DrawArrays(gl.TRIANGLES, 0, 3)
-    gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, nil)
+
+    transform_location := gl.GetUniformLocation(shader_program, "view")
+    flatten := linalg.matrix_flatten(linalg.matrix4_translate_f32({-2.5, -2.5, -5}))
+    raw := raw_data(flatten[:])
+    gl.UniformMatrix4fv(transform_location, 1, gl.FALSE, raw)
+
+    cube_positions : [4][3]f32 = {
+        { 0, 0, -9 },
+        { 1, 1, -8 },
+        { 2, 2, -7 },
+        { 3, 3, -6 },
+    }
+
+    for position, i in cube_positions {
+        translation_matrix := linalg.matrix4_translate_f32(position)
+        rotation_matrix := linalg.matrix4_rotate_f32(cast(f32)glfw.GetTime() * cast(f32)(i%3.0), {1, 1, 1})
+
+        combined_matrix : matrix[4, 4]f32 = translation_matrix * rotation_matrix
+
+        transform_location_m := gl.GetUniformLocation(shader_program, "model")
+        flatten_m := linalg.matrix_flatten(combined_matrix)
+        raw_m := raw_data(flatten_m[:])
+        gl.UniformMatrix4fv(transform_location_m, 1, gl.FALSE, raw_m)
+
+        //gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, nil)
+        gl.DrawArrays(gl.TRIANGLES, 0, 36)
+    }
 }
 
 exit :: proc(){

@@ -1,5 +1,5 @@
 next: 
-https://learnopengl.com/Getting-started/Shaders
+https://learnopengl.com/Getting-started/Transformations
 
 continue debug texture 
 add checking to uniform setters in shader.odin
