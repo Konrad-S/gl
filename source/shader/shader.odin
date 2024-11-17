@@ -3,6 +3,7 @@ package shader
 import "core:os"
 import "core:fmt"
 import "core:strings"
+import "core:math/linalg"
 import gl "vendor:OpenGL"
 
 main :: proc() {}
@@ -72,4 +73,12 @@ set_float :: proc(program : u32, name : cstring, value : f32) {
 set_vec2_float :: proc(program : u32, name : cstring, x, y : f32) {
     location := gl.GetUniformLocation(program, name)
     gl.Uniform2f(location, x, y)
+}
+
+set_matrix4 :: proc(program : u32, name : cstring, value : matrix[4, 4]f32)
+{
+    transform_location := gl.GetUniformLocation(program, name)
+    flatten : [16]f32 = linalg.matrix_flatten(value)
+    raw : [^]f32 = raw_data(flatten[:])
+    gl.UniformMatrix4fv(transform_location, 1, gl.FALSE, raw)
 }

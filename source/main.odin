@@ -5,7 +5,8 @@ import "core:c"
 import "core:strings"
 import "core:os"
 import "core:image/bmp"
-import linalg "core:math/linalg"
+import "core:math"
+import "core:math/linalg"
 
 import gl "vendor:OpenGL"
 import "vendor:glfw"
@@ -44,11 +45,12 @@ main :: proc() {
     glfw.SetFramebufferSizeCallback(window, size_callback)
     gl.load_up_to(int(GL_MAJOR_VERSION), GL_MINOR_VERSION, glfw.gl_set_proc_address) // I assume this does the same thing GLAD would do?
     shader_program, VAO := init()
+    camera_pos : [3]f32 = {0, 0, 3}
 
     for (!glfw.WindowShouldClose(window) && running) {
-        process_input(window)
+        process_input(window, &camera_pos)
         update()
-        draw(shader_program, VAO)
+        draw(shader_program, VAO, camera_pos)
         glfw.SwapBuffers(window)
         glfw.PollEvents()
     }
@@ -58,9 +60,24 @@ main :: proc() {
     exit()
 }
 
-process_input :: proc(window : glfw.WindowHandle) {
+
+process_input :: proc(window : glfw.WindowHandle, camera_pos : ^[3]f32) {
+    // todo : use key callback instead
+    camera_speed : f32 : .05
     if (glfw.GetKey(window, glfw.KEY_ESCAPE) == glfw.PRESS) {
         glfw.SetWindowShouldClose(window, true)
+    }
+    if (glfw.GetKey(window, glfw.KEY_W) == glfw.PRESS) {
+        camera_pos^ += camera_speed * CAMERA_FRONT
+    }
+    if (glfw.GetKey(window, glfw.KEY_S) == glfw.PRESS) {
+        camera_pos^ -= camera_speed * CAMERA_FRONT
+    }
+    if (glfw.GetKey(window, glfw.KEY_A) == glfw.PRESS) {
+        camera_pos^ += camera_speed * linalg.vector_normalize(linalg.vector_cross3(camera_pos^ + CAMERA_FRONT, CAMERA_UP))
+    }
+    if (glfw.GetKey(window, glfw.KEY_D) == glfw.PRESS) {
+        camera_pos^ -= camera_speed * linalg.vector_normalize(linalg.vector_cross3(camera_pos^ + CAMERA_FRONT, CAMERA_UP))
     }
 }
 
@@ -189,22 +206,33 @@ update :: proc(){
     // Own update code here
 }
 
-draw :: proc(shader_program, VAO : u32){
+CAMERA_FRONT : [3]f32 : {0, 0, -1}
+CAMERA_UP    : [3]f32 : {0, 1,  0}
+
+draw :: proc(shader_program, VAO : u32, camera_pos : [3]f32){
     gl.ClearColor(0.2, 0.3, 0.3, 1.0)
     gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
     gl.UseProgram(shader_program)
     gl.BindVertexArray(VAO)
 
-    transform_location := gl.GetUniformLocation(shader_program, "view")
-    flatten := linalg.matrix_flatten(linalg.matrix4_translate_f32({-2.5, -2.5, -5}))
-    raw := raw_data(flatten[:])
-    gl.UniformMatrix4fv(transform_location, 1, gl.FALSE, raw)
+
+    radius : f32 = 10.0
+    cam_x := cast(f32)math.sin(glfw.GetTime()) * radius
+    cam_y := cast(f32)math.cos(glfw.GetTime()) * radius
+
+
+//    view_matrix := linalg.matrix4_look_at_f32({cam_x, 0, cam_y}, {0, 0, 0}, {0, 1, 0})'
+    test := camera_pos + CAMERA_FRONT
+    view_matrix := linalg.matrix4_look_at_f32(camera_pos, test, {0, 1, 0})
+
+    shader.set_matrix4(shader_program, "view", view_matrix)
+
 
     cube_positions : [4][3]f32 = {
-        { 0, 0, -9 },
-        { 1, 1, -8 },
-        { 2, 2, -7 },
-        { 3, 3, -6 },
+        { 0, 0, 0 },
+        { 1, 1, 1 },
+        { 2, 2, 2 },
+        { 3, 3, 3 },
     }
 
     for position, i in cube_positions {
@@ -227,11 +255,14 @@ exit :: proc(){
     // Own termination code here
 }
 
-// Called when glfw keystate changes
 key_callback :: proc "c" (window: glfw.WindowHandle, key, scancode, action, mods: i32) {
-    // Exit program on escape pressed
-    if key == glfw.KEY_ESCAPE {
+    // todo : store all actions in a buffer
+    switch key {
+    case glfw.KEY_ESCAPE:
         running = false
+    case glfw.KEY_W:
+
+
     }
 }
 
