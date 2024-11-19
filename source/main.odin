@@ -47,12 +47,16 @@ main :: proc() {
     shader_program, VAO := init()
     camera_pos : [3]f32 = {0, 0, 3}
 
-    last_time := glfw.GetTime()
+    last_time := cast(f32)glfw.GetTime()
+    game := Game_State{ player_pos = {.2, .05}}
+
     for (!glfw.WindowShouldClose(window) && running) {
-        delta_time := glfw.GetTime() - last_time
-        last_time = glfw.GetTime()
-        process_input(window, &camera_pos, cast(f32)delta_time)
+        delta_time : f32 = cast(f32)glfw.GetTime() - last_time
+        last_time = cast(f32)glfw.GetTime()
+        process_input(window, &camera_pos, delta_time)
         update()
+        simulate(&game, delta_time)
+        shader.set_vec2_float(shader_program, "player_pos", game.player_pos.x, game.player_pos.y)
         draw(shader_program, VAO, camera_pos)
         glfw.SwapBuffers(window)
         glfw.PollEvents()
@@ -63,6 +67,13 @@ main :: proc() {
     exit()
 }
 
+Game_State :: struct {
+    player_pos : [2]f32
+}
+
+simulate :: proc(game : ^Game_State, delta_time : f32) {
+    game.player_pos.x += delta_time * .05
+}
 
 process_input :: proc(window : glfw.WindowHandle, camera_pos : ^[3]f32, delta_time : f32) {
     // todo : use key callback instead
