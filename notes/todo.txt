@@ -10,6 +10,6 @@ models
 	import
 textures
 directional lights and shadows
-point lights
+point lights	
 pbr physical based rendering
 shaders

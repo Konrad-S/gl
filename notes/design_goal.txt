@@ -1,0 +1,6 @@
+create a prototype
+    
+at the same time, create a platform from which you can quickly create future prototypes
+
+the tricky thing is knowing in advance which systems should be robust and modular
+and which should be quick and dirty

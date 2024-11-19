@@ -47,8 +47,11 @@ main :: proc() {
     shader_program, VAO := init()
     camera_pos : [3]f32 = {0, 0, 3}
 
+    last_time := glfw.GetTime()
     for (!glfw.WindowShouldClose(window) && running) {
-        process_input(window, &camera_pos)
+        delta_time := glfw.GetTime() - last_time
+        last_time = glfw.GetTime()
+        process_input(window, &camera_pos, cast(f32)delta_time)
         update()
         draw(shader_program, VAO, camera_pos)
         glfw.SwapBuffers(window)
@@ -61,23 +64,23 @@ main :: proc() {
 }
 
 
-process_input :: proc(window : glfw.WindowHandle, camera_pos : ^[3]f32) {
+process_input :: proc(window : glfw.WindowHandle, camera_pos : ^[3]f32, delta_time : f32) {
     // todo : use key callback instead
-    camera_speed : f32 : .05
+    camera_speed : f32 : 5
     if (glfw.GetKey(window, glfw.KEY_ESCAPE) == glfw.PRESS) {
         glfw.SetWindowShouldClose(window, true)
     }
     if (glfw.GetKey(window, glfw.KEY_W) == glfw.PRESS) {
-        camera_pos^ += camera_speed * CAMERA_FRONT
+        camera_pos^ += CAMERA_FRONT * camera_speed * delta_time
     }
     if (glfw.GetKey(window, glfw.KEY_S) == glfw.PRESS) {
-        camera_pos^ -= camera_speed * CAMERA_FRONT
+        camera_pos^ -= CAMERA_FRONT * camera_speed * delta_time
     }
     if (glfw.GetKey(window, glfw.KEY_A) == glfw.PRESS) {
-        camera_pos^ += camera_speed * linalg.vector_normalize(linalg.vector_cross3(camera_pos^ + CAMERA_FRONT, CAMERA_UP))
+        camera_pos^ += linalg.vector_normalize(linalg.vector_cross3(camera_pos^ + CAMERA_FRONT, CAMERA_UP)) * camera_speed * delta_time
     }
     if (glfw.GetKey(window, glfw.KEY_D) == glfw.PRESS) {
-        camera_pos^ -= camera_speed * linalg.vector_normalize(linalg.vector_cross3(camera_pos^ + CAMERA_FRONT, CAMERA_UP))
+        camera_pos^ -= linalg.vector_normalize(linalg.vector_cross3(camera_pos^ + CAMERA_FRONT, CAMERA_UP)) * camera_speed * delta_time
     }
 }
 
